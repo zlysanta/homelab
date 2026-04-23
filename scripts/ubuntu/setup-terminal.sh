@@ -19,8 +19,7 @@ fi
 if [[ -t 0 ]]; then
   read -rp "Enter Zsh theme [${DEFAULT_THEME}]: " ZSH_THEME
 else
-  echo "Enter Zsh theme [${DEFAULT_THEME}]: "
-  read -r ZSH_THEME < /dev/tty
+  read -rp "Enter Zsh theme [${DEFAULT_THEME}]: " ZSH_THEME < /dev/tty
 fi
 
 ZSH_THEME="${ZSH_THEME:-$DEFAULT_THEME}"
