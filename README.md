@@ -17,3 +17,9 @@ Setup SSH (pubkey login only, sshd_config)
 ```shell
 curl -s https://raw.githubusercontent.com/zlysanta/homelab/main/scripts/ubuntu/setup-ssh.sh | bash
 ```
+
+Install Docker
+
+```shell
+curl -s https://raw.githubusercontent.com/zlysanta/homelab/main/scripts/ubuntu/install-docker.sh | bash
+```
