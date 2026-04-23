@@ -8,7 +8,12 @@ sudo -v
 
 # ---- USER INPUT ----
 echo "Paste your public SSH key (single line):"
-read -r SSH_KEY
+
+if [[ -t 0 ]]; then
+  read -rp "Enter SSH key: " SSH_KEY
+else
+  read -rp "Enter SSH key: " SSH_KEY < /dev/tty
+fi
 
 if [[ -z "$SSH_KEY" ]]; then
   echo "No SSH key provided. Exiting."

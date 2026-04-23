@@ -16,7 +16,13 @@ if command -v apt >/dev/null 2>&1; then
 fi
 
 # ---- 1. ASK FOR ZSH THEME ----
-read -rp "Enter Zsh theme [${DEFAULT_THEME}]: " ZSH_THEME
+if [[ -t 0 ]]; then
+  read -rp "Enter Zsh theme [${DEFAULT_THEME}]: " ZSH_THEME
+else
+  echo "Enter Zsh theme [${DEFAULT_THEME}]: "
+  read -r ZSH_THEME < /dev/tty
+fi
+
 ZSH_THEME="${ZSH_THEME:-$DEFAULT_THEME}"
 
 echo "Using theme: $ZSH_THEME"
