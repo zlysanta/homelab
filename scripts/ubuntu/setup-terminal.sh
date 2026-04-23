@@ -2,6 +2,8 @@
 
 set -e
 
+# ---- SUDO START ----
+echo "Requesting sudo access..."
 sudo -v
 
 # ---- CONFIG ----
