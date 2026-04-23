@@ -3,20 +3,20 @@
 set -e
 
 # ---- SUDO START ----
-echo "Requesting sudo access..."
+echo "[Homelab] Requesting sudo access..."
 sudo -v
 
 # ---- USER INPUT ----
-echo "Paste your public SSH key (single line):"
+echo "[Homelab] Paste your public SSH key (single line):"
 
 if [[ -t 0 ]]; then
-  read -rp "Enter SSH key: " SSH_KEY
+  read -rp "[Homelab] Enter SSH key: " SSH_KEY
 else
-  read -rp "Enter SSH key: " SSH_KEY < /dev/tty
+  read -rp "[Homelab] Enter SSH key: " SSH_KEY < /dev/tty
 fi
 
 if [[ -z "$SSH_KEY" ]]; then
-  echo "No SSH key provided. Exiting."
+  echo "[Homelab] No SSH key provided. Exiting."
   exit 1
 fi
 
@@ -32,9 +32,9 @@ touch "$AUTHORIZED_KEYS"
 chmod 600 "$AUTHORIZED_KEYS"
 
 if grep -qxF "$SSH_KEY" "$AUTHORIZED_KEYS"; then
-  echo "Key already exists in authorized_keys."
+  echo "[Homelab] Key already exists in authorized_keys."
 else
-  echo "Adding SSH key..."
+  echo "[Homelab] Adding SSH key..."
   echo "$SSH_KEY" >> "$AUTHORIZED_KEYS"
 fi
 
@@ -43,7 +43,7 @@ SSHD_CONFIG="/etc/ssh/sshd_config"
 
 backup="/etc/ssh/sshd_config.bak.$(date +%F-%H%M%S)"
 sudo cp "$SSHD_CONFIG" "$backup"
-echo "Backup created at $backup"
+echo "[Homelab] Backup created at $backup"
 
 set_or_replace() {
   local key="$1"
@@ -56,24 +56,24 @@ set_or_replace() {
   fi
 }
 
-echo "Updating sshd_config..."
+echo "[Homelab] Updating sshd_config..."
 
 set_or_replace "PermitRootLogin" "no"
 set_or_replace "PubkeyAuthentication" "yes"
 set_or_replace "PasswordAuthentication" "no"
 
 # ---- VALIDATE CONFIG ----
-echo "Validating SSH config..."
+echo "[Homelab] Validating SSH config..."
 sudo sshd -t
 
 # ---- RESTART SSH ----
-echo "Restarting SSH service..."
+echo "[Homelab] Restarting SSH service..."
 if systemctl is-active --quiet ssh; then
   sudo systemctl restart ssh
 elif systemctl is-active --quiet sshd; then
   sudo systemctl restart sshd
 else
-  echo "Warning: SSH service not found via systemctl."
+  echo "[Homelab] Warning: SSH service not found via systemctl."
 fi
 
-echo "Done. SSH hardened and key installed."
+echo "[Homelab] Done. SSH hardened and key installed."
