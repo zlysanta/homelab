@@ -81,4 +81,3 @@ sudo nmcli con down "$CON_NAME" || true
 sudo nmcli con up "$CON_NAME"
 
 echo "[Homelab] Done."
-nmcli -p con show "$CON_NAME"
