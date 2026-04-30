@@ -7,50 +7,67 @@ sudo -v
 
 # ---- CHECK NMCLI ----
 if ! command -v nmcli &>/dev/null; then
-  echo "[Network] nmcli not found. Install NetworkManager first."
+  echo "[Homelab] nmcli not found. Install NetworkManager first."
   exit 1
 fi
 
-# ---- SHOW CONNECTIONS ----
-echo "[Network] Available connections:"
-nmcli con show
+# ---- GET CONNECTION LIST ----
+mapfile -t CON_LIST < <(nmcli -t -f NAME con show)
+
+if [[ ${#CON_LIST[@]} -eq 0 ]]; then
+  echo "[Homelab] No network connections found."
+  exit 1
+fi
+
+echo "[Homelab] Available connections:"
+for i in "${!CON_LIST[@]}"; do
+  echo "  [$i] ${CON_LIST[$i]}"
+done
 
 echo
 
-# ---- CONNECTION NAME ----
+# ---- SELECT CONNECTION ----
 if [[ -t 0 ]]; then
-  read -rp "[Network] Enter connection name to modify: " CON_NAME
+  read -rp "[Homelab] Select connection number: " CON_INDEX
 else
-  read -rp "[Network] Enter connection name to modify: " CON_NAME < /dev/tty
+  read -rp "[Homelab] Select connection number: " CON_INDEX < /dev/tty
 fi
+
+if ! [[ "$CON_INDEX" =~ ^[0-9]+$ ]] || [[ "$CON_INDEX" -ge "${#CON_LIST[@]}" ]]; then
+  echo "[Homelab] Invalid selection."
+  exit 1
+fi
+
+CON_NAME="${CON_LIST[$CON_INDEX]}"
+echo "[Homelab] Selected: $CON_NAME"
 
 # ---- IP ADDRESS ----
 if [[ -t 0 ]]; then
-  read -rp "[Network] Enter static IP (e.g. 192.168.1.50/24): " IP_ADDR
+  read -rp "[Homelab] Enter static IP: " IP_ADDR
 else
-  read -rp "[Network] Enter static IP (e.g. 192.168.1.50/24): " IP_ADDR < /dev/tty
+  read -rp "[Homelab] Enter static IP: " IP_ADDR < /dev/tty
 fi
 
 # ---- GATEWAY ----
 if [[ -t 0 ]]; then
-  read -rp "[Network] Enter gateway (e.g. 192.168.1.1): " GATEWAY
+  read -rp "[Homelab] Enter gateway: " GATEWAY
 else
-  read -rp "[Network] Enter gateway (e.g. 192.168.1.1): " GATEWAY < /dev/tty
+  read -rp "[Homelab] Enter gateway: " GATEWAY < /dev/tty
 fi
 
 # ---- DNS ----
 if [[ -t 0 ]]; then
-  read -rp "[Network] Enter DNS servers (comma-separated): " DNS
+  read -rp "[Homelab] Enter DNS servers (comma-separated): " DNS
 else
-  read -rp "[Network] Enter DNS servers (comma-separated): " DNS < /dev/tty
+  read -rp "[Homelab] Enter DNS servers (comma-separated): " DNS < /dev/tty
 fi
 
 if [[ -z "$CON_NAME" || -z "$IP_ADDR" || -z "$GATEWAY" || -z "$DNS" ]]; then
-  echo "[Network] Missing required values. Exiting."
+  echo "[Homelab] Missing required values. Exiting."
   exit 1
 fi
 
-echo "[Network] Applying static configuration..."
+echo "[Homelab] Applying static configuration..."
 
 # ---- APPLY CONFIG ----
 sudo nmcli con mod "$CON_NAME" ipv4.addresses "$IP_ADDR"
@@ -59,9 +76,9 @@ sudo nmcli con mod "$CON_NAME" ipv4.dns "$DNS"
 sudo nmcli con mod "$CON_NAME" ipv4.method manual
 sudo nmcli con mod "$CON_NAME" ipv4.ignore-auto-dns yes
 
-echo "[Network] Restarting connection..."
+echo "[Homelab] Restarting connection..."
 sudo nmcli con down "$CON_NAME" || true
 sudo nmcli con up "$CON_NAME"
 
-echo "[Network] Done."
+echo "[Homelab] Done."
 nmcli -p con show "$CON_NAME"
