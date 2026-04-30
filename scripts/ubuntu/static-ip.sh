@@ -53,10 +53,10 @@ fi
 echo "[Network] Applying static configuration..."
 
 # ---- APPLY CONFIG ----
-sudo nmcli con mod "$CON_NAME" ipv4.method manual
 sudo nmcli con mod "$CON_NAME" ipv4.addresses "$IP_ADDR"
 sudo nmcli con mod "$CON_NAME" ipv4.gateway "$GATEWAY"
 sudo nmcli con mod "$CON_NAME" ipv4.dns "$DNS"
+sudo nmcli con mod "$CON_NAME" ipv4.method manual
 sudo nmcli con mod "$CON_NAME" ipv4.ignore-auto-dns yes
 
 echo "[Network] Restarting connection..."
